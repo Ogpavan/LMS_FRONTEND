@@ -64,9 +64,7 @@ const Sidebar = ({ onClose }) => {
     const fetchMenu = async () => {
       if (user?.role_id) {
         try {
-          const res = await axios.get(
-            `${import.meta.env.VITE_API_URL}/menu/${user.role_id}`
-          );
+          const res = await axios.get(`/menu/${user.role_id}`);
           setMenuItems(res.data.menu); // assuming { menu: [...] }
         } catch (err) {
           console.error("Failed to fetch menu:", err);
