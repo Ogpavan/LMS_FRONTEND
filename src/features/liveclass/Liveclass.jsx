@@ -28,7 +28,7 @@ function Liveclass() {
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/liveclasses/all")
+    fetch("/api/liveclasses/all")
       .then((res) => res.json())
       .then((data) => {
         setLiveClasses(data.liveClasses || []);
