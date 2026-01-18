@@ -47,8 +47,8 @@ const icons = {
 
 const roleLabels = {
   1: "Admin",
-  2: "Student",
-  3: "Instructor",
+  3: "Student",
+  2: "Instructor",
 };
 
 const Sidebar = ({ onClose }) => {

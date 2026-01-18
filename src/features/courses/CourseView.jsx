@@ -151,35 +151,6 @@ function CourseView() {
             Duration: {currentChapter?.duration}
           </p>
           {/* Comments */}
-          <div>
-            <h4 className="font-semibold mb-2">Comments</h4>
-            <form onSubmit={handleCommentSubmit} className="mb-4 flex gap-2">
-              <input
-                type="text"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Add a comment..."
-                className="flex-1 px-3 py-2 border rounded-lg text-sm bg-gray-100 dark:bg-gray-800"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
-              >
-                Comment
-              </button>
-            </form>
-            <div className="space-y-3">
-              {comments.map((c) => (
-                <div key={c.id} className="border-b pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm">{c.user}</span>
-                    <span className="text-xs text-gray-400">{c.date}</span>
-                  </div>
-                  <p className="text-sm mt-1">{c.comment}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -20,12 +20,12 @@ import {
 } from "@/components/ui/CustomModal";
 
 function Instructors() {
-  const [students, setStudents] = useState([]);
+  const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editStudent, setEditStudent] = useState(null);
+  const [editInstructor, setEditInstructor] = useState(null);
   const [editForm, setEditForm] = useState({
     full_name: "",
     email: "",
@@ -33,13 +33,13 @@ function Instructors() {
   });
 
   const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [statusStudent, setStatusStudent] = useState(null);
+  const [statusInstructor, setStatusInstructor] = useState(null);
 
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleteStudent, setDeleteStudent] = useState(null);
+  const [deleteInstructor, setDeleteInstructor] = useState(null);
 
-  // Add student modal state
+  // Add instructor modal state
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addForm, setAddForm] = useState({
     full_name: "",
@@ -50,23 +50,23 @@ function Instructors() {
   const [addLoading, setAddLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/instructors`)
+    fetch(`${import.meta.env.VITE_API_URL}/instructors/role/2`)
       .then((res) => res.json())
       .then((data) => {
-        const arr = Array.isArray(data) ? data : data.students || [];
-        setStudents(arr);
+        const arr = Array.isArray(data.users) ? data.users : [];
+        setInstructors(arr);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
 
   // Open edit modal and set form values
-  const handleEdit = (student) => {
-    setEditStudent(student);
+  const handleEdit = (instructor) => {
+    setEditInstructor(instructor);
     setEditForm({
-      full_name: student.full_name || "",
-      email: student.email || "",
-      phone: student.phone || "",
+      full_name: instructor.full_name || "",
+      email: instructor.email || "",
+      phone: instructor.phone || "",
     });
     setEditModalOpen(true);
   };
@@ -80,32 +80,32 @@ function Instructors() {
     }));
   };
 
-  // Save changes (implement API call as needed)
+  // Save changes
   const handleEditSave = async () => {
     try {
       await fetch(
-        `${import.meta.env.VITE_API_URL}/instructors/${editStudent.user_id}`,
+        `${import.meta.env.VITE_API_URL}/instructors/${editInstructor.user_id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editForm),
+          body: JSON.stringify({ ...editForm, role_id: 2 }),
         }
       );
-      setStudents((prev) =>
+      setInstructors((prev) =>
         prev.map((s) =>
-          s.user_id === editStudent.user_id ? { ...s, ...editForm } : s
+          s.user_id === editInstructor.user_id ? { ...s, ...editForm } : s
         )
       );
       setEditModalOpen(false);
-      setEditStudent(null);
+      setEditInstructor(null);
     } catch {
-      alert("Failed to update student.");
+      alert("Failed to update instructor.");
     }
   };
 
   // Open delete modal
-  const handleDelete = (student) => {
-    setDeleteStudent(student);
+  const handleDelete = (instructor) => {
+    setDeleteInstructor(instructor);
     setDeleteModalOpen(true);
   };
 
@@ -113,21 +113,23 @@ function Instructors() {
   const handleDeleteConfirm = async () => {
     try {
       await fetch(
-        `${import.meta.env.VITE_API_URL}/instructors/${deleteStudent.user_id}`,
+        `${import.meta.env.VITE_API_URL}/instructors/${
+          deleteInstructor.user_id
+        }`,
         { method: "DELETE" }
       );
-      setStudents((prev) =>
-        prev.filter((s) => s.user_id !== deleteStudent.user_id)
+      setInstructors((prev) =>
+        prev.filter((s) => s.user_id !== deleteInstructor.user_id)
       );
       setDeleteModalOpen(false);
-      setDeleteStudent(null);
+      setDeleteInstructor(null);
     } catch {
-      alert("Failed to delete student.");
+      alert("Failed to delete instructor.");
     }
   };
 
-  const handleToggleStatus = (student) => {
-    setStatusStudent(student);
+  const handleToggleStatus = (instructor) => {
+    setStatusInstructor(instructor);
     setStatusModalOpen(true);
   };
 
@@ -135,29 +137,29 @@ function Instructors() {
     try {
       await fetch(
         `${import.meta.env.VITE_API_URL}/instructors/${
-          statusStudent.user_id
+          statusInstructor.user_id
         }/status`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ is_active: !statusStudent.is_active }),
+          body: JSON.stringify({ is_active: !statusInstructor.is_active }),
         }
       );
-      setStudents((prev) =>
+      setInstructors((prev) =>
         prev.map((s) =>
-          s.user_id === statusStudent.user_id
+          s.user_id === statusInstructor.user_id
             ? { ...s, is_active: !s.is_active }
             : s
         )
       );
       setStatusModalOpen(false);
-      setStatusStudent(null);
+      setStatusInstructor(null);
     } catch {
       alert("Failed to update status.");
     }
   };
 
-  // Add student handlers
+  // Add instructor handlers
   const handleAddFormChange = (e) => {
     const { name, value } = e.target;
     setAddForm((prev) => ({
@@ -166,28 +168,31 @@ function Instructors() {
     }));
   };
 
-  const handleAddStudent = async (e) => {
+  const handleAddInstructor = async (e) => {
     e.preventDefault();
     setAddLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/instructors`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...addForm,
-          password: addForm.password,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/instructors/create`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...addForm,
+            role_id: 2,
+          }),
+        }
+      );
       const data = await res.json();
       if (res.ok && data.user) {
-        setStudents((prev) => [...prev, data.user]);
+        setInstructors((prev) => [...prev, data.user]);
         setAddModalOpen(false);
         setAddForm({ full_name: "", email: "", phone: "", password: "" });
       } else {
-        alert(data.error || "Failed to add student.");
+        alert(data.error || "Failed to add instructor.");
       }
     } catch {
-      alert("Failed to add student.");
+      alert("Failed to add instructor.");
     }
     setAddLoading(false);
   };
@@ -216,12 +221,12 @@ function Instructors() {
               <TableRow>
                 <TableCell colSpan={7}>Loading...</TableCell>
               </TableRow>
-            ) : !Array.isArray(students) || students.length === 0 ? (
+            ) : !Array.isArray(instructors) || instructors.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7}>No students found.</TableCell>
+                <TableCell colSpan={7}>No instructors found.</TableCell>
               </TableRow>
             ) : (
-              students.map((s, idx) => (
+              instructors.map((s, idx) => (
                 <TableRow key={s.user_id}>
                   <TableCell>{idx + 1}</TableCell>
                   <TableCell>{s.full_name}</TableCell>
@@ -271,17 +276,17 @@ function Instructors() {
         </Table>
       </Card>
 
-      {/* Add Student Modal */}
+      {/* Add Instructor Modal */}
       <CustomModal open={addModalOpen} onOpenChange={setAddModalOpen}>
         <ModalContent>
           <ModalHeader>
-            <ModalTitle>Add Student</ModalTitle>
+            <ModalTitle>Add Instructor</ModalTitle>
             <ModalDescription>
-              Enter details to create a new student.
+              Enter details to create a new instructor.
             </ModalDescription>
           </ModalHeader>
           <form
-            onSubmit={handleAddStudent}
+            onSubmit={handleAddInstructor}
             className="flex flex-col gap-4"
             autoComplete="off"
           >
@@ -347,9 +352,9 @@ function Instructors() {
       <CustomModal open={editModalOpen} onOpenChange={setEditModalOpen}>
         <ModalContent>
           <ModalHeader>
-            <ModalTitle>Edit Student</ModalTitle>
+            <ModalTitle>Edit Instructor</ModalTitle>
             <ModalDescription>
-              Update the student's details below.
+              Update the instructor's details below.
             </ModalDescription>
           </ModalHeader>
           <form
@@ -408,17 +413,18 @@ function Instructors() {
         <ModalContent>
           <ModalHeader>
             <ModalTitle>
-              {statusStudent?.is_active ? "Deactivate" : "Activate"} Student
+              {statusInstructor?.is_active ? "Deactivate" : "Activate"}{" "}
+              Instructor
             </ModalTitle>
             <ModalDescription>
               Are you sure you want to{" "}
-              {statusStudent?.is_active ? "deactivate" : "activate"}{" "}
-              <b>{statusStudent?.full_name}</b>?
+              {statusInstructor?.is_active ? "deactivate" : "activate"}{" "}
+              <b>{statusInstructor?.full_name}</b>?
             </ModalDescription>
           </ModalHeader>
           <ModalFooter>
             <Button onClick={handleStatusConfirm}>
-              Yes, {statusStudent?.is_active ? "Deactivate" : "Activate"}
+              Yes, {statusInstructor?.is_active ? "Deactivate" : "Activate"}
             </Button>
             <ModalClose asChild>
               <Button type="button" variant="outline">
@@ -433,9 +439,10 @@ function Instructors() {
       <CustomModal open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
         <ModalContent>
           <ModalHeader>
-            <ModalTitle>Delete Student</ModalTitle>
+            <ModalTitle>Delete Instructor</ModalTitle>
             <ModalDescription>
-              Are you sure you want to delete <b>{deleteStudent?.full_name}</b>?
+              Are you sure you want to delete{" "}
+              <b>{deleteInstructor?.full_name}</b>?
             </ModalDescription>
           </ModalHeader>
           <ModalFooter>

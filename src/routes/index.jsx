@@ -17,6 +17,8 @@ import Liveclass from "@/features/liveclass/Liveclass.jsx";
 import UploadCourse from "../features/courses/UploadCourse.jsx";
 import CreateClass from "@/features/liveclass/CreateClass.jsx";
 import Enrollments from "@/features/enrollments/Enrollments.jsx";
+import DisplayCourses from "@/features/landingpage/DisplayCourses.jsx";
+import CourseJsonEditor from "@/features/landingpage/CourseJsonEditor.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -58,6 +60,14 @@ export const router = createBrowserRouter([
             element: (
               <ProtectedRoute allowedRoles={["admin", "instructor", "student"]}>
                 <Courses />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "displaycourses",
+            element: (
+              <ProtectedRoute allowedRoles={["admin", "instructor", "student"]}>
+                <DisplayCourses />
               </ProtectedRoute>
             ),
           },
@@ -140,6 +150,10 @@ export const router = createBrowserRouter([
                 <Enrollments />
               </ProtectedRoute>
             ),
+          },
+          {
+            path: "courses/:id/json",
+            element: <CourseJsonEditor />,
           },
         ],
       },

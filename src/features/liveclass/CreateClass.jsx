@@ -267,7 +267,7 @@ export default function CreateClass() {
                       name="course_id"
                       value={form.course_id}
                       onChange={handleChange}
-                      className="w-full border rounded px-2 py-2"
+                      className="w-full border border-gray-300 rounded px-2 py-2"
                       required
                     >
                       <option value="">Select course</option>
@@ -284,7 +284,7 @@ export default function CreateClass() {
                       name="chapter_id"
                       value={form.chapter_id}
                       onChange={handleChange}
-                      className="w-full border rounded px-2 py-2"
+                      className="w-full border  border-gray-300 rounded px-2 py-2"
                       required
                       disabled={!form.course_id}
                     >
