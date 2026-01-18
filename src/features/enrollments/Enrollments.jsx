@@ -27,7 +27,7 @@ export default function EnrollStudentsPage() {
 
   useEffect(() => {
     // Fetch courses
-    fetch("http://localhost:5000/api/courses")
+    fetch(`${import.meta.env.VITE_API_URL}/courses`)
       .then((res) => res.json())
       .then((data) => {
         if (data.courses) {
@@ -38,12 +38,12 @@ export default function EnrollStudentsPage() {
               info: `Language: ${c.language} · Level: ${c.level} · ${
                 c.is_free ? "Free" : "Paid"
               } Course`,
-            }))
+            })),
           );
         }
       });
     // Fetch students
-    fetch("http://localhost:5000/api/students")
+    fetch(`${import.meta.env.VITE_API_URL}/students`)
       .then((res) => res.json())
       .then((data) => {
         setStudents(
@@ -51,7 +51,7 @@ export default function EnrollStudentsPage() {
             id: s.user_id,
             label: s.full_name,
             email: s.email,
-          }))
+          })),
         );
       });
   }, []);
@@ -157,17 +157,17 @@ export default function EnrollStudentsPage() {
                           return;
                         }
                         const res = await fetch(
-                          `http://localhost:5000/api/enrollments/${enrollmentId}/cancel`,
-                          { method: "POST" }
+                          `${import.meta.env.VITE_API_URL}/enrollments/${enrollmentId}/cancel`,
+                          { method: "POST" },
                         );
                         if (res.ok) {
                           setEnrollSuccess(
-                            "Enrollment cancelled successfully!"
+                            "Enrollment cancelled successfully!",
                           );
                         } else {
                           const data = await res.json();
                           setEnrollSuccess(
-                            data.error || "Failed to cancel enrollment"
+                            data.error || "Failed to cancel enrollment",
                           );
                         }
                       } catch (err) {
@@ -227,7 +227,7 @@ export default function EnrollStudentsPage() {
                 setEnrollSuccess(null);
                 try {
                   const res = await fetch(
-                    "http://localhost:5000/api/enrollments",
+                    `${import.meta.env.VITE_API_URL}/enrollments`,
                     {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
@@ -236,7 +236,7 @@ export default function EnrollStudentsPage() {
                         course_id: selectedCourse.id,
                         enrollment_type: "admin",
                       }),
-                    }
+                    },
                   );
                   if (res.ok) {
                     setEnrollSuccess("Student enrolled successfully!");

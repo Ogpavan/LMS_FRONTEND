@@ -49,7 +49,7 @@ export default function CreateClass() {
 
   // Fetch courses and chapters from the correct API
   useEffect(() => {
-    fetch("http://localhost:5000/api/liveclasses/courses-with-chapters")
+    fetch(`${import.meta.env.VITE_API_URL}/liveclasses/courses-with-chapters`)
       .then((res) => res.json())
       .then((data) => {
         if (data.courses) setCourses(data.courses);
@@ -60,7 +60,9 @@ export default function CreateClass() {
   const fetchOwnClasses = () => {
     const user = getUser();
     if (!user?.user_id) return;
-    fetch(`http://localhost:5000/api/liveclasses?teacher_id=${user.user_id}`)
+    fetch(
+      `${import.meta.env.VITE_API_URL}/liveclasses?teacher_id=${user.user_id}`,
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data.liveClasses) setOwnClasses(data.liveClasses);
@@ -127,7 +129,7 @@ export default function CreateClass() {
       user = JSON.parse(localStorage.getItem("user"));
     } catch {}
 
-    const res = await fetch("http://localhost:5000/api/liveclasses", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/liveclasses`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -144,7 +146,7 @@ export default function CreateClass() {
 
     if (res.status === 401) {
       // Unauthorized, redirect to Google login page (backend route)
-      window.location.href = "http://localhost:5000/api/google/login";
+      window.location.href = `${import.meta.env.VITE_API_URL}/google/login`;
       return;
     }
 
@@ -172,20 +174,20 @@ export default function CreateClass() {
   // Suspend class handler
   const handleSuspend = async (classId) => {
     const res = await fetch(
-      `http://localhost:5000/api/liveclasses/${classId}/suspend`,
+      `${import.meta.env.VITE_API_URL}/liveclasses/${classId}/suspend`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-      }
+      },
     );
     if (res.ok) {
       setOwnClasses((prev) =>
         prev.map((c) =>
           c.id === classId
             ? { ...c, is_suspended: true, status: "suspended" }
-            : c
-        )
+            : c,
+        ),
       );
     }
     setSuspendModal({ open: false, classId: null });

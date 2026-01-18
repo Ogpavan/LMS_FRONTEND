@@ -83,7 +83,7 @@ function CourseJsonEditor() {
     setUploading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/api/upload", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -91,7 +91,7 @@ function CourseJsonEditor() {
       const { url } = await res.json();
       handleChange("image", url);
     } catch (err) {
-      setError("Image upload failed");
+      setError("Image upload failed: " + err.message);
     }
     setUploading(false);
   }
@@ -268,7 +268,7 @@ function CourseJsonEditor() {
                 src={
                   courseJson.image.startsWith("http")
                     ? courseJson.image
-                    : `http://localhost:5000${courseJson.image}`
+                    : `${import.meta.env.VITE_API_URL}${courseJson.image}`
                 }
                 alt="Course"
                 className="mt-2 max-h-40 rounded border"

@@ -137,7 +137,7 @@ function DisplayCourses() {
     setAddError("");
     setAddSuccess("");
     try {
-      const res = await fetch("http://localhost:5000/api/category", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/category`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newCategory),
@@ -168,10 +168,13 @@ function DisplayCourses() {
         // Upload image to server
         const formData = new FormData();
         formData.append("image", addCourseImageFile);
-        const uploadRes = await fetch("http://localhost:5000/api/upload", {
-          method: "POST",
-          body: formData,
-        });
+        const uploadRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/upload`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
         const uploadData = await uploadRes.json();
         if (!uploadRes.ok || !uploadData.url) {
           throw new Error(uploadData.error || "Image upload failed");
@@ -183,16 +186,19 @@ function DisplayCourses() {
         addCourseForm.course_code && addCourseForm.course_code.trim() !== ""
           ? addCourseForm.course_code
           : `course-${Date.now()}`;
-      const res = await fetch("http://localhost:5000/api/display-courses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...addCourseForm,
-          image_url: imageUrl,
-          course_code,
-          price: addCourseForm.price || 0,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/display-courses`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...addCourseForm,
+            image_url: imageUrl,
+            course_code,
+            price: addCourseForm.price || 0,
+          }),
+        },
+      );
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || "Failed to add course");
@@ -520,7 +526,7 @@ function DisplayCourses() {
                         src={
                           course.image_url.startsWith("http")
                             ? course.image_url
-                            : `http://localhost:5000${course.image_url}`
+                            : `${import.meta.env.VITE_BASE_URL}${course.image_url}`
                         }
                         alt="course"
                         className="w-16 h-10 object-cover rounded"

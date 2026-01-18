@@ -1,7 +1,7 @@
 // Utility to fetch categories from the backend
 export async function fetchCategories() {
   try {
-    const response = await fetch("http://localhost:5000/api/category");
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/category`);
     if (!response.ok) throw new Error("Failed to fetch categories");
     return await response.json();
   } catch (err) {
