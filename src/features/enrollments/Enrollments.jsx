@@ -1,272 +1,236 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { Card } from "@/components/ui/card";
 import {
-  CustomModal,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalTitle,
-  ModalClose,
-} from "@/components/ui/CustomModal";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
-export default function EnrollStudentsPage() {
-  const [enrollLoading, setEnrollLoading] = useState(false);
-  const [enrollSuccess, setEnrollSuccess] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [pendingEnroll, setPendingEnroll] = useState(null);
-  const [courses, setCourses] = useState([]);
+function Enrollments() {
   const [students, setStudents] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  // const [selectedStudent, setSelectedStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
-    // Fetch courses
-    fetch(`${import.meta.env.VITE_API_URL}/courses`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.courses) {
-          setCourses(
-            data.courses.map((c) => ({
-              id: c.course_id || c.id,
-              label: c.title,
-              info: `Language: ${c.language} · Level: ${c.level} · ${
-                c.is_free ? "Free" : "Paid"
-              } Course`,
-            })),
-          );
-        }
-      });
-    // Fetch students
-    fetch(`${import.meta.env.VITE_API_URL}/students`)
-      .then((res) => res.json())
-      .then((data) => {
-        setStudents(
-          data.map((s) => ({
-            id: s.user_id,
-            label: s.full_name,
-            email: s.email,
-          })),
+    const fetchStudents = async () => {
+      try {
+        const res = await fetch(
+          "https://app.skillspardha.com/api/enrollments/paid",
         );
-      });
+        if (!res.ok) throw new Error("Failed to fetch students");
+        const data = await res.json();
+        setStudents(data.students || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
   }, []);
 
-  useEffect(() => {
-    if (courses.length && !selectedCourse) setSelectedCourse(courses[0]);
-  }, [courses]);
+  const handleToggleApprove = async (userId, isApproved) => {
+    setTogglingId(userId);
+    try {
+      const endpoint = isApproved
+        ? `https://app.skillspardha.com/api/auth/users/${userId}/unapprove`
+        : `https://app.skillspardha.com/api/auth/users/${userId}/approve`;
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error("Failed to toggle approval");
+      setStudents((prev) =>
+        prev.map((s) =>
+          s.user_id === userId ? { ...s, is_approved: !isApproved } : s,
+        ),
+      );
+    } catch (err) {
+      alert("Error toggling approval: " + err.message);
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const handleShowDetails = (student) => {
+    setSelectedStudent(student);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedStudent(null);
+  };
 
   return (
-    <div className="p-4 max-w-7xl mx-auto space-y-4">
-      {/* Page Header */}
-      <div className="mb-2">
-        <h1 className="text-xl font-semibold leading-tight">Enroll Students</h1>
-        <p className="text-xs text-muted-foreground">
-          Add students to this course
-        </p>
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Student Enrollments
+        </h1>
       </div>
-
-      {/* Course & Student Dropdowns in a single row */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
-        <div className="w-full sm:w-1/2">
-          <Select
-            value={selectedCourse?.id?.toString() || ""}
-            onValueChange={(val) => {
-              const found = courses.find((c) => c.id.toString() === val);
-              if (found) setSelectedCourse(found);
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a course..." />
-            </SelectTrigger>
-            <SelectContent>
-              {courses.map((course) => (
-                <SelectItem key={course.id} value={course.id.toString()}>
-                  {course.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="w-full sm:w-1/2">
-          <input
-            type="text"
-            placeholder="Search student by name or email..."
-            className="w-full border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-black"
-          />
-        </div>
-      </div>
-
-      {/* Course Info */}
-      {selectedCourse && (
-        <div className="w-full border rounded-lg p-2 bg-background mb-2">
-          <h2 className="font-medium text-base leading-tight">
-            {selectedCourse.label}
-          </h2>
-          <div className="text-xs text-muted-foreground mt-1">
-            {selectedCourse.info}
-          </div>
-        </div>
-      )}
-
-      {/* Students Table */}
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-xs">
-          <thead className="bg-muted">
-            <tr>
-              <th className="text-left px-2 py-2 font-medium">Student</th>
-              <th className="text-left px-2 py-2 font-medium">Email</th>
-              <th className="text-right px-2 py-2 font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((student) => (
-              <tr className="border-t" key={student.id}>
-                <td className="px-2 py-2 font-medium">{student.label}</td>
-                <td className="px-2 py-2">{student.email}</td>
-                <td className="px-2 py-2 text-right flex gap-2 justify-end">
-                  <button
-                    className="text-xs px-3 py-1 rounded-md bg-black text-white hover:bg-black/90"
-                    onClick={() => {
-                      setPendingEnroll(student);
-                      setModalOpen(true);
-                    }}
-                  >
-                    Enroll
-                  </button>
-                  <button
-                    className="text-xs px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700"
-                    onClick={async () => {
-                      // Call cancel enrollment API
-                      setEnrollLoading(true);
-                      setEnrollSuccess(null);
-                      try {
-                        // You need to know the enrollment_id for this student in this course
-                        // For demo, assume API: /api/enrollments/cancel?student_id=...&course_id=...
-                        // But with new backend, use: /api/enrollments/:id/cancel
-                        // You may need to fetch the enrollment_id from backend if not available in students[]
-                        // Here, we just show a placeholder
-                        const enrollmentId = student.enrollment_id; // This must be available in your data
-                        if (!enrollmentId) {
-                          setEnrollSuccess("No enrollment found to cancel");
-                          setEnrollLoading(false);
-                          return;
-                        }
-                        const res = await fetch(
-                          `${import.meta.env.VITE_API_URL}/enrollments/${enrollmentId}/cancel`,
-                          { method: "POST" },
-                        );
-                        if (res.ok) {
-                          setEnrollSuccess(
-                            "Enrollment cancelled successfully!",
-                          );
-                        } else {
-                          const data = await res.json();
-                          setEnrollSuccess(
-                            data.error || "Failed to cancel enrollment",
-                          );
-                        }
-                      } catch (err) {
-                        setEnrollSuccess("Failed to cancel enrollment");
+      <Card className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6}>Loading...</TableCell>
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={6}>Error: {error}</TableCell>
+              </TableRow>
+            ) : students.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6}>No students found.</TableCell>
+              </TableRow>
+            ) : (
+              students.map((student, idx) => (
+                <TableRow key={student.user_id}>
+                  <TableCell>{idx + 1}</TableCell>
+                  <TableCell>{student.full_name}</TableCell>
+                  <TableCell>{student.email}</TableCell>
+                  <TableCell>{student.phone || "N/A"}</TableCell>
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      variant={student.is_approved ? "success" : "outline"}
+                      className={
+                        student.is_approved
+                          ? "bg-green-100 text-green-700 hover:bg-green-200"
+                          : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
                       }
-                      setEnrollLoading(false);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Footer */}
-      <div className="text-xs text-muted-foreground mt-2">
-        Total enrolled students:{" "}
-        <span className="font-medium">{students.length}</span>
-      </div>
-
-      {/* Enroll Confirmation Modal */}
-      <CustomModal open={modalOpen} onOpenChange={setModalOpen}>
-        <ModalContent>
-          <ModalHeader>
-            <ModalTitle>Confirm Enrollment</ModalTitle>
-          </ModalHeader>
-          <div className="text-center text-base">
-            {pendingEnroll && selectedCourse && (
-              <>
-                Are you sure you want to enroll <b>{pendingEnroll.label}</b> (
-                <span className="text-xs">{pendingEnroll.email}</span>)<br />
-                in <b>{selectedCourse.label}</b>?
-              </>
+                      disabled={togglingId === student.user_id}
+                      onClick={() =>
+                        handleToggleApprove(
+                          student.user_id,
+                          student.is_approved,
+                        )
+                      }
+                    >
+                      {togglingId === student.user_id
+                        ? "Processing..."
+                        : student.is_approved
+                          ? "Approved"
+                          : "Pending"}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleShowDetails(student)}
+                    >
+                      Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
             )}
-          </div>
-          <ModalFooter>
-            <button
-              type="button"
-              className="bg-black text-white rounded-full px-6 py-2 font-semibold shadow-md hover:bg-black/90"
-              onClick={() => {
-                setModalOpen(false);
-                setPendingEnroll(null);
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="bg-blue-600 text-white rounded-full px-6 py-2 font-semibold shadow-md hover:bg-blue-700 disabled:opacity-60"
-              disabled={enrollLoading}
-              onClick={async () => {
-                if (!pendingEnroll || !selectedCourse) return;
-                setEnrollLoading(true);
-                setEnrollSuccess(null);
-                try {
-                  const res = await fetch(
-                    `${import.meta.env.VITE_API_URL}/enrollments`,
-                    {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        student_id: pendingEnroll.id,
-                        course_id: selectedCourse.id,
-                        enrollment_type: "admin",
-                      }),
-                    },
-                  );
-                  if (res.ok) {
-                    setEnrollSuccess("Student enrolled successfully!");
-                  } else {
-                    const data = await res.json();
-                    setEnrollSuccess(data.error || "Failed to enroll student");
-                  }
-                } catch (err) {
-                  setEnrollSuccess("Failed to enroll student");
-                }
-                setEnrollLoading(false);
-                setModalOpen(false);
-                setPendingEnroll(null);
-              }}
-            >
-              {enrollLoading ? "Enrolling..." : "Confirm & Enroll"}
-            </button>
-          </ModalFooter>
-        </ModalContent>
-      </CustomModal>
-      {/* Success/Error Message */}
-      {enrollSuccess && (
+          </TableBody>
+        </Table>
+      </Card>
+
+      {/* Modal for course details */}
+      {modalOpen && selectedStudent && (
         <div
-          className={`fixed bottom-4 left-1/2 -translate-x-1/2 px-6 py-2 rounded-lg shadow-lg text-white z-50 ${
-            enrollSuccess.includes("success") ? "bg-green-600" : "bg-red-600"
-          }`}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={handleCloseModal}
         >
-          {enrollSuccess}
+          <div
+            style={{
+              background: "#fff",
+              padding: "2rem",
+              borderRadius: "8px",
+              minWidth: "320px",
+              maxWidth: "90vw",
+              boxShadow: "0 2px 16px rgba(0,0,0,0.2)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold mb-2">
+              {selectedStudent.full_name}'s Courses
+            </h2>
+            {selectedStudent.courses && selectedStudent.courses.length > 0 ? (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ border: "1px solid #eee", padding: "6px" }}>
+                      Title
+                    </th>
+                    <th style={{ border: "1px solid #eee", padding: "6px" }}>
+                      Payment
+                    </th>
+                    <th style={{ border: "1px solid #eee", padding: "6px" }}>
+                      Mode
+                    </th>
+                    <th style={{ border: "1px solid #eee", padding: "6px" }}>
+                      Enrolled At
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedStudent.courses.map((course) => (
+                    <tr key={course.enrollment_id}>
+                      <td style={{ border: "1px solid #eee", padding: "6px" }}>
+                        {course.course_title}
+                      </td>
+                      <td style={{ border: "1px solid #eee", padding: "6px" }}>
+                        {course.payment_status}
+                      </td>
+                      <td style={{ border: "1px solid #eee", padding: "6px" }}>
+                        {course.payment_mode}
+                      </td>
+                      <td style={{ border: "1px solid #eee", padding: "6px" }}>
+                        {new Date(course.enrolled_at).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div>No courses found.</div>
+            )}
+            <div style={{ textAlign: "right", marginTop: "1rem" }}>
+              <Button size="sm" variant="outline" onClick={handleCloseModal}>
+                Close
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
 }
+
+export default Enrollments;

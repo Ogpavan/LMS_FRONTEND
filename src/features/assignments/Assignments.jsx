@@ -6,36 +6,7 @@ import {
   faUpload,
 } from "@fortawesome/free-solid-svg-icons";
 
-const dummyAssignments = [
-  {
-    id: 1,
-    title: "React Components Assignment",
-    description:
-      "Build a simple React app with functional and class components.",
-    dueDate: "2025-12-10",
-    status: "Pending",
-    submissionUrl: "#",
-    grade: null,
-  },
-  {
-    id: 2,
-    title: "JavaScript ES6 Quiz",
-    description: "Complete the quiz on ES6 features and syntax.",
-    dueDate: "2025-12-08",
-    status: "Submitted",
-    submissionUrl: "#",
-    grade: "A",
-  },
-  {
-    id: 3,
-    title: "UI/UX Wireframe",
-    description: "Design a wireframe for a mobile app using Figma.",
-    dueDate: "2025-12-12",
-    status: "Pending",
-    submissionUrl: "#",
-    grade: null,
-  },
-];
+const dummyAssignments = [];
 
 function Assignments() {
   // Categorize assignments

@@ -83,18 +83,23 @@ function Students() {
   // Save changes (implement API call as needed)
   const handleEditSave = async () => {
     try {
+      // Only include password if not blank
+      const payload = { ...editForm };
+      if (!payload.password) {
+        delete payload.password;
+      }
       await fetch(
         `${import.meta.env.VITE_API_URL}/students/${editStudent.user_id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editForm),
-        }
+          body: JSON.stringify(payload),
+        },
       );
       setStudents((prev) =>
         prev.map((s) =>
-          s.user_id === editStudent.user_id ? { ...s, ...editForm } : s
-        )
+          s.user_id === editStudent.user_id ? { ...s, ...editForm } : s,
+        ),
       );
       setEditModalOpen(false);
       setEditStudent(null);
@@ -114,10 +119,10 @@ function Students() {
     try {
       await fetch(
         `${import.meta.env.VITE_API_URL}/students/${deleteStudent.user_id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       setStudents((prev) =>
-        prev.filter((s) => s.user_id !== deleteStudent.user_id)
+        prev.filter((s) => s.user_id !== deleteStudent.user_id),
       );
       setDeleteModalOpen(false);
       setDeleteStudent(null);
@@ -141,14 +146,14 @@ function Students() {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ is_active: !statusStudent.is_active }),
-        }
+        },
       );
       setStudents((prev) =>
         prev.map((s) =>
           s.user_id === statusStudent.user_id
             ? { ...s, is_active: !s.is_active }
-            : s
-        )
+            : s,
+        ),
       );
       setStatusModalOpen(false);
       setStatusStudent(null);
@@ -389,6 +394,18 @@ function Students() {
                 value={editForm.phone}
                 onChange={handleEditFormChange}
                 className="w-full border rounded px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={editForm.password || ""}
+                onChange={handleEditFormChange}
+                className="w-full border rounded px-3 py-2"
+                autoComplete="new-password"
+                placeholder="Leave blank to keep unchanged"
               />
             </div>
             <ModalFooter>

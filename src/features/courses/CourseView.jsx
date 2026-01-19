@@ -47,7 +47,12 @@ function CourseView() {
   }, [courseId]);
 
   if (loading) return <div className="p-6">Loading...</div>;
-  if (!course) return <div className="p-6">Course not found</div>;
+  if (!course)
+    return (
+      <div className="flex justify-center items-center p-6 min-h-screen">
+        Classes will be available soon. Stay tuned!
+      </div>
+    );
 
   const currentChapter = chapters[selectedChapter];
 
