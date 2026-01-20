@@ -83,7 +83,7 @@ function CourseJsonEditor() {
     setUploading(true);
     setError("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+      const res = await fetch(`https://app.skillspardha.com/api/upload`, {
         method: "POST",
         body: formData,
       });
@@ -268,7 +268,7 @@ function CourseJsonEditor() {
                 src={
                   courseJson.image.startsWith("http")
                     ? courseJson.image
-                    : `${import.meta.env.VITE_API_URL}${courseJson.image}`
+                    : `https://app.skillspardha.com${courseJson.image}`
                 }
                 alt="Course"
                 className="mt-2 max-h-40 rounded border"

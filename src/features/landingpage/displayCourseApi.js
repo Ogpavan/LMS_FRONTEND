@@ -2,7 +2,7 @@
 export async function updateDisplayCourse(id, data) {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/display-courses/${id}`,
+      `https://app.skillspardha.com/api/display-courses/${id}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -21,7 +21,7 @@ export async function updateDisplayCourse(id, data) {
 export async function deleteDisplayCourse(id) {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/display-courses/${id}`,
+      `https://app.skillspardha.com/api/display-courses/${id}`,
       {
         method: "DELETE",
       },
@@ -37,7 +37,7 @@ export async function deleteDisplayCourse(id) {
 export async function fetchDisplayCourses() {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/display-courses`,
+      `https://app.skillspardha.com/api/display-courses`,
     );
     if (!response.ok) throw new Error("Failed to fetch courses");
     return await response.json();
@@ -51,7 +51,7 @@ export async function fetchDisplayCourses() {
 export async function fetchDisplayCourseDetails(courseId) {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/display-courses/${courseId}/details`,
+      `https://app.skillspardha.com/api/display-courses/${courseId}/details`,
     );
     if (!response.ok) throw new Error("Failed to fetch course details");
     return await response.json();
@@ -64,7 +64,7 @@ export async function fetchDisplayCourseDetails(courseId) {
 // Save display course JSON
 export async function saveDisplayCourseJson(id, courseJson) {
   const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/display-courses/${id}/details`,
+    `https://app.skillspardha.com/api/display-courses/${id}/details`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
