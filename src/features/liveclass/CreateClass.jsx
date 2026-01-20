@@ -32,14 +32,13 @@ export default function CreateClass() {
     startTime: "",
     endTime: "",
     course_id: "",
-    chapter_id: "",
+    // Remove chapter_id
   });
 
   const [message, setMessage] = useState("");
   const [createdClass, setCreatedClass] = useState(null);
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState([]);
-  const [chapters, setChapters] = useState([]);
   const [ownClasses, setOwnClasses] = useState([]);
   const [suspendModal, setSuspendModal] = useState({
     open: false,
@@ -47,9 +46,9 @@ export default function CreateClass() {
   });
   const navigate = useNavigate();
 
-  // Fetch courses and chapters from the correct API
+  // Fetch courses only (no chapters)
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/liveclasses/courses-with-chapters`)
+    fetch(`https://app.skillspardha.com/api/liveclasses/courses-with-chapters`)
       .then((res) => res.json())
       .then((data) => {
         if (data.courses) setCourses(data.courses);
@@ -73,13 +72,8 @@ export default function CreateClass() {
     fetchOwnClasses();
   }, []);
 
-  // Update chapters when course changes
-  useEffect(() => {
-    const selected = courses.find((c) => c.course_id == form.course_id);
-    setChapters(selected ? selected.chapters : []);
-    setForm((prev) => ({ ...prev, chapter_id: "" }));
-    // eslint-disable-next-line
-  }, [form.course_id]);
+  // Remove chapters state and related logic
+  // Remove useEffect for chapters
 
   // Calendar and Google Calendar integration removed
 
@@ -161,7 +155,6 @@ export default function CreateClass() {
         startTime: "",
         endTime: "",
         course_id: "",
-        chapter_id: "",
       });
       fetchOwnClasses();
     } else {
@@ -262,45 +255,24 @@ export default function CreateClass() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs mb-1">Course</label>
-                    <select
-                      name="course_id"
-                      value={form.course_id}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 rounded px-2 py-2"
-                      required
-                    >
-                      <option value="">Select course</option>
-                      {courses.map((c) => (
-                        <option key={c.course_id} value={c.course_id}>
-                          {c.course_title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs mb-1">Chapter</label>
-                    <select
-                      name="chapter_id"
-                      value={form.chapter_id}
-                      onChange={handleChange}
-                      className="w-full border  border-gray-300 rounded px-2 py-2"
-                      required
-                      disabled={!form.course_id}
-                    >
-                      <option value="">Select chapter</option>
-                      {chapters &&
-                        chapters.length > 0 &&
-                        chapters.map((ch) => (
-                          <option key={ch.chapter_id} value={ch.chapter_id}>
-                            {ch.chapter_title}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-xs mb-1">Course</label>
+                  <select
+                    name="course_id"
+                    value={form.course_id}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded px-2 py-2"
+                    required
+                  >
+                    <option value="">Select course</option>
+                    {courses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+                {/* Removed chapter dropdown */}
                 <Button
                   type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700"

@@ -28,7 +28,18 @@ function Liveclass() {
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   useEffect(() => {
-    fetch("/api/liveclasses/all")
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id || user?.user_id; // Adjust key as per your user object
+
+    if (!userId) {
+      setError("User not found");
+      setLoading(false);
+      return;
+    }
+
+    fetch(
+      `https://app.skillspardha.com/api/liveclasses/students/${userId}/live-classes`,
+    )
       .then((res) => res.json())
       .then((data) => {
         setLiveClasses(data.liveClasses || []);
@@ -92,7 +103,7 @@ function Liveclass() {
               // Only enable available dates
               disabled={(date) =>
                 !availableDates.some(
-                  (d) => d.toDateString() === date.toDateString()
+                  (d) => d.toDateString() === date.toDateString(),
                 )
               }
               modifiers={{
@@ -145,7 +156,7 @@ function Liveclass() {
 
                   return (
                     <Card
-                      key={live.id}
+                      key={live.live_class_id}
                       className="flex flex-col justify-between h-full rounded-lg shadow-sm border hover:shadow-md transition-shadow"
                       style={{ minHeight: 230 }}
                     >
