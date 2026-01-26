@@ -44,6 +44,24 @@ export default function CreateClass() {
     open: false,
     classId: null,
   });
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    classId: null,
+  });
+  // Delete class handler
+  const handleDelete = async (classId) => {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/liveclasses/${classId}/cancel`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      },
+    );
+    if (res.ok) {
+      setOwnClasses((prev) => prev.filter((c) => c.id !== classId));
+    }
+    setDeleteModal({ open: false, classId: null });
+  };
   const navigate = useNavigate();
 
   // Fetch courses only (no chapters)
@@ -358,18 +376,65 @@ export default function CreateClass() {
                               </a>
                             </Button>
                           )}
-                        <Button
-                          variant="outline"
-                          className="text-xs px-3 py-1 border-red-500 text-red-600 hover:bg-red-50"
-                          disabled={
-                            cls.is_suspended || cls.status === "suspended"
-                          }
-                          onClick={() =>
-                            setSuspendModal({ open: true, classId: cls.id })
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            className="text-xs px-3 py-1 border-red-500 text-red-600 hover:bg-red-50"
+                            disabled={
+                              cls.is_suspended || cls.status === "suspended"
+                            }
+                            onClick={() =>
+                              setSuspendModal({ open: true, classId: cls.id })
+                            }
+                          >
+                            Suspend
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="text-xs px-3 py-1 border-gray-500 text-gray-600 hover:bg-gray-50"
+                            onClick={() =>
+                              setDeleteModal({ open: true, classId: cls.id })
+                            }
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                        {/* Delete confirmation modal */}
+                        <CustomModal
+                          open={deleteModal.open}
+                          onOpenChange={(open) =>
+                            setDeleteModal((prev) => ({ ...prev, open }))
                           }
                         >
-                          Suspend
-                        </Button>
+                          <ModalContent>
+                            <ModalHeader>
+                              <ModalTitle>Delete Live Class</ModalTitle>
+                              <ModalDescription>
+                                Are you sure you want to delete this class? This
+                                will cancel the Google Meet and remove the class
+                                permanently.
+                              </ModalDescription>
+                            </ModalHeader>
+                            <ModalFooter>
+                              <Button
+                                variant="outline"
+                                onClick={() =>
+                                  setDeleteModal({ open: false, classId: null })
+                                }
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                                onClick={() =>
+                                  handleDelete(deleteModal.classId)
+                                }
+                              >
+                                Yes, Delete
+                              </Button>
+                            </ModalFooter>
+                          </ModalContent>
+                        </CustomModal>
                       </div>
                     </div>
                   ))}
