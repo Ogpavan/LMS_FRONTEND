@@ -51,7 +51,7 @@ export default function CreateClass() {
   // Delete class handler
   const handleDelete = async (classId) => {
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/liveclasses/${classId}/cancel`,
+      `https://app.skillspardha.com/api/liveclasses/${classId}/cancel`,
       {
         method: "DELETE",
         credentials: "include",
@@ -78,7 +78,7 @@ export default function CreateClass() {
     const user = getUser();
     if (!user?.user_id) return;
     fetch(
-      `${import.meta.env.VITE_API_URL}/liveclasses?teacher_id=${user.user_id}`,
+      `https://app.skillspardha.com/api/liveclasses?teacher_id=${user.user_id}`,
     )
       .then((res) => res.json())
       .then((data) => {
@@ -141,7 +141,7 @@ export default function CreateClass() {
       user = JSON.parse(localStorage.getItem("user"));
     } catch {}
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/liveclasses`, {
+    const res = await fetch(`https://app.skillspardha.com/api/liveclasses`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -158,7 +158,7 @@ export default function CreateClass() {
 
     if (res.status === 401) {
       // Unauthorized, redirect to Google login page (backend route)
-      window.location.href = `${import.meta.env.VITE_API_URL}/google/login`;
+      window.location.href = `https://app.skillspardha.com/api/google/login`;
       return;
     }
 
@@ -185,7 +185,7 @@ export default function CreateClass() {
   // Suspend class handler
   const handleSuspend = async (classId) => {
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/liveclasses/${classId}/suspend`,
+      `https://app.skillspardha.com/api/liveclasses/${classId}/suspend`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
